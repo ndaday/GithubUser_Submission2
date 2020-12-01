@@ -36,7 +36,7 @@ class MainViewModel : ViewModel() {
                     for (i in 0 until jsonArray.length()) {
                         val user = jsonArray.getJSONObject(i)
                         val userItems = UserItems()
-                        userItems.name = user.getString("login")
+                        userItems.username = user.getString("login")
                         userItems.avatar = user.getString("avatar_url")
                         userItems.url = user.getString("url")
                         listItems.add(userItems)
@@ -88,9 +88,9 @@ class MainViewModel : ViewModel() {
                         val avatar = item.getString("avatar_url")
                         val url = item.getString("url")
                         val user = UserItems()
-                        user.name = username
-                        user.avatar = avatar
+                        user.username = username
                         user.url = url
+                        user.avatar = avatar
                         listUser.add(user)
                     }
                     listUsers.postValue(listUser)
@@ -114,7 +114,7 @@ class MainViewModel : ViewModel() {
         val listItems = ArrayList<UserItems>()
 
         val users = AsyncHttpClient()
-        val url = "https://api.github.com/users?q=$id"
+        val url = "https://api.github.com/users/$id"
 
         users.addHeader("Authorization", "token 885b2d6762fa3017d164dd39154e1ae661dcc1e4")
         users.addHeader("User-Agent", "request")
@@ -127,17 +127,25 @@ class MainViewModel : ViewModel() {
                 val result = String(responseBody)
                 try {
                     val jsonObject = JSONObject(result)
-                    val username: String? = jsonObject.getString("login").toString()
-                    val name: String? = jsonObject.getString("name").toString()
-                    val avatar: String? = jsonObject.getString("avatar_url").toString()
-                    val company: String? = jsonObject.getString("company").toString()
-                    val location: String? = jsonObject.getString("location").toString()
-                    val repository: String? = jsonObject.getString("public_repos")
-                    val followers: String? = jsonObject.getString("followers")
-                    val following: String? = jsonObject.getString("following")
-
-                    listItems.addAll(listItems)
-
+                    val username: String = jsonObject.getString("login").toString()
+                    val name: String = jsonObject.getString("name").toString()
+                    val avatar: String = jsonObject.getString("avatar_url").toString()
+                    val company: String = jsonObject.getString("company").toString()
+                    val location: String = jsonObject.getString("location").toString()
+                    val followers: Int = jsonObject.getInt("followers")
+                    val following: Int = jsonObject.getInt("following")
+                    listItems.add(
+                        UserItems(
+                            username,
+                            name,
+                            avatar,
+                            company,
+                            location,
+                            followers.toString(),
+                            following
+                        )
+                    )
+                    listUsers.postValue(listItems)
                 } catch (e: Exception) {
                     Log.d("Exception", e.message.toString())
                 }
@@ -153,4 +161,87 @@ class MainViewModel : ViewModel() {
             }
         })
     }
+
+    fun getUserFollower(username: String) {
+        val listUser = ArrayList<UserItems>()
+
+        val users = AsyncHttpClient()
+        val url = "https://api.github.com/users/$username/followers"
+
+        users.addHeader("Authorization", "token 885b2d6762fa3017d164dd39154e1ae661dcc1e4")
+        users.addHeader("User-Agent", "request")
+        users.get(url, object : AsyncHttpResponseHandler() {
+            override fun onSuccess(
+                statusCode: Int,
+                headers: Array<Header>,
+                responseBody: ByteArray
+            ) {
+
+                val result = String(responseBody)
+                try {
+                    val jsonArray = JSONArray(result)
+
+                    for (i in 0 until jsonArray.length()) {
+                        val jsonObject = jsonArray.getJSONObject(i)
+                        val username = jsonObject.getString("login")
+                        getUsersDetail(username)
+                    }
+                    listUsers.postValue(listUser)
+                } catch (e: Exception) {
+                    Log.d("Exception", e.message.toString())
+                }
+            }
+
+            override fun onFailure(
+                statusCode: Int,
+                headers: Array<Header>,
+                responseBody: ByteArray,
+                error: Throwable
+            ) {
+                Log.d("Exception", error.message.toString())
+            }
+        })
+    }
+
+    fun getUserFollowing(username: String) {
+        val listUser = ArrayList<UserItems>()
+
+        val users = AsyncHttpClient()
+        val url = "https://api.github.com/users/$username/following"
+
+        users.addHeader("Authorization", "token 885b2d6762fa3017d164dd39154e1ae661dcc1e4")
+        users.addHeader("User-Agent", "request")
+        users.get(url, object : AsyncHttpResponseHandler() {
+            override fun onSuccess(
+                statusCode: Int,
+                headers: Array<Header>,
+                responseBody: ByteArray
+            ) {
+
+                val result = String(responseBody)
+                try {
+                    val jsonArray = JSONArray(result)
+
+                    for (i in 0 until jsonArray.length()) {
+                        val jsonObject = jsonArray.getJSONObject(i)
+                        val username = jsonObject.getString("login")
+                        getUsersDetail(username)
+                    }
+                    listUsers.postValue(listUser)
+                } catch (e: Exception) {
+                    Log.d("Exception", e.message.toString())
+                }
+            }
+
+            override fun onFailure(
+                statusCode: Int,
+                headers: Array<Header>,
+                responseBody: ByteArray,
+                error: Throwable
+            ) {
+                Log.d("Exception", error.message.toString())
+            }
+        })
+    }
+
 }

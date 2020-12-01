@@ -1,13 +1,15 @@
 package com.daday.githubuser
 
+import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.item_users.view.*
+import kotlinx.android.synthetic.main.item_users.view.img_avatar
 
 class UserAdapter : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
@@ -43,7 +45,7 @@ class UserAdapter : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
                     .load(userItems.avatar)
                     .apply(RequestOptions().override(55, 55))
                     .into(img_avatar)
-                tv_item_username.text = userItems.name
+                tv_item_username.text = userItems.username
                 tv_item_description.text = userItems.url
 
                 itemView.setOnClickListener{onItemClickCallback?.onItemClicked(userItems)}

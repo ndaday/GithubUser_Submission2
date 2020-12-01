@@ -17,7 +17,7 @@ class SectionsPagerAdapter(private val mContext: Context, fm: FragmentManager) :
     override fun getItem(position: Int): Fragment {
        var fragment: Fragment? = null
         when(position){
-            0 -> fragment = username?.let { FollowerFragment.newInstance(it) }
+            0 -> fragment = FollowerFragment.newInstance(username)
             1 -> fragment = FollowingFragment.newInstance(username)
         }
         return fragment as Fragment
